@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>WATable working with Perl</title>
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.0/jquery.js" type="text/javascript"></script>
+    <script src="http://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/js/bootstrap.min.js" type="text/javascript"></script>
+    <script src="jquery.watable.js" type="text/javascript" charset="utf-8"></script>
+    <link rel='stylesheet' href="http://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/css/bootstrap-combined.min.css"/>
+    <link rel='stylesheet' href='watable.css'/>
+    <style type="text/css">
+        body { padding: 30px; font-size: 12px }
+    </style>
+</head>
+<body>
+<h2>WATable working with Perl</h2>
+<p><a href="http://wootapa-watable.appspot.com/">http://wootapa-watable.appspot.com/</a></p>
+<div id="div1"></div>
+
+<script type="text/javascript">
+    $(document).ready( function() {
+
+        //An example with all options.
+         var waTable = $('#div1').WATable({
+            pageSize: 8,                //Sets the initial pagesize
+            filter: true,               //Show filter fields
+            columnPicker: true,         //Show the columnPicker button
+            pageSizes: [1,5,8,12,200],  //Set custom pageSizes. Leave empty array to hide button.
+            hidePagerOnEmpty: true,     //Removes the pager if data is empty.
+            checkboxes: true,           //Make rows checkable. (Note. You need a column with the 'unique' property)
+            preFill: true,              //Initially fills the table with empty rows (as many as the pagesize).
+            url: 'watable.pl',           //Url to a webservice if not setting data manually as we do in this example
+            urlData: { MODE:0 },         //Any data you need to pass to the webservice
+            //urlPost: true             //Use POST httpmethod to webservice. Default is GET.
+            types: {                    //Following are some specific properties related to the data types
+                string: {
+                    //filterTooltip: "Giggedi..."    //What to say in tooltip when hoovering filter fields. Set false to remove.
+                    //placeHolder: "Type here..."    //What to say in placeholder filter fields. Set false for empty.
+                },
+                number: {
+                    decimals: 1   //Sets decimal precision for float types
+                },
+                bool: {
+                    //filterTooltip: false
+                },
+                date: {
+                  utc: true,            //Show time as universal time, ie without timezones.
+                  //format: 'yy/dd/MM',   //The format. See all possible formats here http://arshaw.com/xdate/#Formatting.
+                  datePicker: true      //Requires "Datepicker for Bootstrap" plugin (http://www.eyecon.ro/bootstrap-datepicker).
+                }
+            },
+            actions: {                //This generates a button where you can add elements.
+                filter: true,         //If true, the filter fields can be toggled visible and hidden.
+                columnPicker: true,   //if true, the columnPicker can be toggled visible and hidden.
+                custom: [             //Add any other elements here. Here is a refresh and export example.
+                  $('<a href="#" class="refresh"><i class="icon-refresh"></i>&nbsp;Refresh</a>'),
+                  $('<a href="#" class="export_all"><i class="icon-share"></i>&nbsp;Export all rows</a>'),
+                  $('<a href="#" class="export_checked"><i class="icon-share"></i>&nbsp;Export checked rows</a>'),
+                  $('<a href="#" class="export_filtered"><i class="icon-share"></i>&nbsp;Export filtered rows</a>')
+                ]
+            },
+            tableCreated: function(data) {    //Fires when the table is created / recreated. Use it if you want to manipulate the table in any way.
+                console.log('table created'); //data.table holds the html table element.
+                console.log(data);            //'this' keyword also holds the html table element.
+            },
+            rowClicked: function(data) {      //Fires when a row is clicked (Note. You need a column with the 'unique' property).
+                console.log('row clicked');   //data.event holds the original jQuery event.
+                console.log(data);            //data.row holds the underlying row you supplied.
+                                              //data.column holds the underlying column you supplied.
+                                              //data.checked is true if row is checked.
+                                              //'this' keyword holds the clicked element.
+                if ( $(this).hasClass('userId') ) {
+                  data.event.preventDefault();
+                  alert('You clicked userId: ' + data.row.userId);
+                }
+            },
+            columnClicked: function(data) {    //Fires when a column is clicked
+              console.log('column clicked');  //data.event holds the original jQuery event
+              console.log(data);              //data.column holds the underlying column you supplied
+                                              //data.descending is true when sorted descending (duh)
+            },
+            pageChanged: function(data) {      //Fires when manually changing page
+              console.log('page changed');    //data.event holds the original jQuery event
+              console.log(data);              //data.page holds the new page index
+            },
+            pageSizeChanged: function(data) {  //Fires when manually changing pagesize
+              console.log('pagesize changed');//data.event holds teh original event
+              console.log(data);              //data.pageSize holds the new pagesize
+            }
+        }).data('WATable');  //This step reaches into the html data property to get the actual WATable object. Important if you want a reference to it as we want here.
+
+
+    });
+
+</script>
+</body>
+</html>

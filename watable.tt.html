@@ -1,0 +1,164 @@
+=title Perl and WA Table
+=timestamp 2014-04-20T20:01:05
+=status show
+=original perl-tutorial
+=showright 1
+=newsletter 0
+=published 0
+=author 0
+=translator 0
+=archive 0
+=comments 0
+=social 1
+
+<h2>Problem</h2>
+<p>I write software that manages trade shows and corporate events (using Perl, 
+   HTML5, Bootstrap 2.3.3 and JQuery). I'm required to print badges for all 
+   attendees and provide a searchable report to show management. 
+   My old system grew slower and slower the more names I added to my database. 
+   After testing many table plug-ins for JQuery, I came across <a href="http://wootapa-watable.appspot.com/">WA Table</a>.
+   It provided all of the functions I needed with out having to have multiple 
+   JQuery table plug-ins conflicting with each other.
+</p>
+<p>There were no examples in the documentation as to how to link my database to 
+   the JSON format needed by the plug-in. After looking at the WA Table 
+   documentation (its a bit thin) and the supplied on-line samples (quite a lot 
+   of comments) I was able to modify my exsting Perl script to output the required 
+   JSON format to work wth the WA Table plug-in.
+</p> 
+
+<h2>Why WA Table</h2>
+<p>I have tried most of the JQuery table plug-ins. Many are fine plug-ins, but 
+   none really worked that way I wanted. WA Table combines into one small JQuery plug-in all of following functions:</p>
+<ul>
+   <li>Fast Screen rendering</li>
+   <li>Paganation</li>
+   <li>Filtering of data. RegExs can be used.</li>
+   <li>Selectable data</li>
+   <li>Easy to understand javascript object format. So I can modify what I need to.</li>       
+</ul>
+
+<p>These are not all of the abilities of WA Table. For a complete list go to the WA Table web site at: <a href="http://wootapa-watable.appspot.com/">http://wootapa-watable.appspot.com/</a>
+
+<h2>How does WA Table work?</h2>
+<p>
+   WA Table is a JQuery plug-in. This means that you must include the JQuery.min.js file in your HTML file. You set up the WA Table plug-in using the following code:
+</p>
+<pre class="prettyprint linenums language-perl">
+  <ol class="linenums">
+      <li class="L0"><span class="pln">         var waTable = $('#div1').WATable({</span></li>
+      <li class="L1"><span class="pln">            url: 'watable.pl',           //Url to a webservice if not setting data manually as we do in this example</span></li>
+      <li class="L2"><span class="pln">            urlData: { MODE:0 }         //Any data you need to pass to the webservice</span></li>
+      <li class="L3"><span class="pln">        }).data('WATable'); </span></li>
+  </ol>
+</pre>
+<p>This is not a complete example of the WA Table javascriipt call. Please see the 
+   WA Table index.html file for that. It is important to note that you can pass 
+   parameters back to your Perl script using the urlData property.
+</p>
+
+<h2>Perl to WA Table</h2>
+<p>I'm using a CSV file to simulate a backend database, but in production I use 
+   a MySQL database and DBI to access all of my data. Below I show how to read 
+   the CSV data into a Perl array. I'm using CGI::Simple to parse any data being 
+   passed to the server. I'm using the Perl Maven Tutorial <a href="http://perlmaven.com/installing-perl-and-getting-started">Installing and getting started with Perl</a> 
+   as the template of my example. I suggest read this tutorial first if you don;t understand how to process data from a CSV file.    
+</p>
+
+<pre class="prettyprint linenums language-perl">
+  <ol class="linenums">
+      <li class="L0"><span class="kwd">use</span><span class="pln"> strict</span><span class="pun">;</span></li>
+      <li class="L1"><span class="kwd">use</span><span class="pln"> warnings</span><span class="pun">;</span></li>
+      <li class="L2"><span class="kwd">use</span><span class="pln"> Text::CSV</span><span class="pun">;</span></li>
+      <li class="L3"><span class="kwd">use</span><span class="pln"> JSON</span><span class="pun">;</span></li>
+      <li class="L4"><span class="kwd">use</span><span class="pln"> CGI::Simple::Standard qw(param header url)</span><span class="pun">;</span></li>
+      <li class="L5"><span class="kwd">use</span><span class="pln"> CGI::Carp qw(fatalsToBrowser)</span><span class="pun">;</span></li>
+      <li class="L6"><span class="pln">&nbsp;</span></li>
+      <li class="L7"><span class="pln"></span><span class="str"># define my vars</span></li>
+      <li class="L8"><span class="pln"></span><span class="str">my $file = 'names.csv'</span><span class="pun">;</span></li>
+      <li class="L9"><span class="pln"></span><span class="str">my @names</span><span class="pun">;</span></li>
+      <li class="L10"><span class="pln"></span><span class="str">my $jsonStructure</span><span class="pun">;</span></li>
+      <li class="L11"><span class="pln"></span><span class="str">my $json = new JSON</span><span class="pun">;</span></li>
+      <li class="L12"><span class="pln"></span><span class="str">my $col</span><span class="pun">;</span></li>
+      <li class="L13"><span class="pln"></span><span class="str">my $q = new CGI::Simple</span><span class="pun">;</span></li>
+      <li class="L14"><span class="pln"></span><span class="str">print $q->header()</span><span class="pun">;</span></li>
+      <li class="L15"><span class="pln"></span><span class="str">&nbsp;</span></li>
+      <li class="L16"><span class="pln"></span><span class="str">my $csv = Text::CSV->new ({</span></li>
+      <li class="L17"><span class="pln"></span><span class="str">  binary    => 1,</span></li>
+      <li class="L18"><span class="pln"></span><span class="str">  auto_diag => 1,</span></li>
+      <li class="L19"><span class="pln"></span><span class="str">  sep_char  => ','    # not really needed as this is the default</span></li>
+      <li class="L20"><span class="pln"></span><span class="str">})</span><span class="pun">;</span></li>
+      <li class="L21"><span class="pln"></span><span class="str">&nbsp;</span></li>
+      <li class="L22"><span class="pln"></span><span class="str"># the lines here read the data from the name.csv file</span></li>
+      <li class="L23"><span class="pln"></span><span class="str">open(my $data, '<:encoding(utf8)', $file) or die "Could not open '$file' $!\n"</span><span class="pun">;</span></li>
+      <li class="L24"><span class="pln"></span><span class="str">$csv->column_names ($csv->getline ($data)); # use header row to define column name hash</span></li>
+      <li class="L25"><span class="pln"></span><span class="str">&nbsp;</span></li>
+      <li class="L26"><span class="pln"></span><span class="str">while (my $row = $csv->getline_hr( $data )) {</span></li>
+      <li class="L27"><span class="pln"></span><span class="str">  push @names, $row;   #data is now in a hash format of $row->{fieldname}</span></li>
+      <li class="L28"><span class="pln"></span><span class="str">}</span></li>
+      <li class="L29"><span class="pln"></span><span class="str">if (not $csv->eof) {</span></li>
+      <li class="L30"><span class="pln"></span><span class="str">  $csv->error_diag()</span><span class="pun">;</span></li>
+      <li class="L31"><span class="pln"></span><span class="str">}</span></li>
+      <li class="L32"><span class="pln"></span><span class="str">close $data</span><span class="pun">;</span></li>
+      <li class="L33"><span class="pln">&nbsp;</span></li>
+  </ol>
+</pre>
+
+<p>The important work is done on line 28 where I push the $row hash in to the @names array.</p>
+
+<p>The next part is to define the column data expected by the WA Table plug-in. 
+   This is another hash. You need an hash entry for each column to be displayed. 
+   The base key to the column hash is the name of the field in the CSV file. WA 
+   Table is looking for the following Properties for each column.
+</p>
+<ol>
+    <li>index = Column Number. Starting at 0</li>                    
+    <li>type = Column Data Type. Used to define the type of filters to apply. These are: string, number, date and bool.</li>              
+    <li>friendly = Text used as Column Heading</li>
+    <li>placeHolder = Text used in the place holder text box</li>    
+    <li>unique = wa table requires a unique ID to use it's row selection checkbox</li>
+    <li>filterTooltip = Show or hide the filter tool tip</li>
+</ol>
+
+<pre class="prettyprint linenums language-perl">
+  <ol class="linenums">
+
+      <li class="L0"><span class="pln"></span><span class="str">$col->{'fieldname'}->{'index'}=0</span><span class="pun">;</span></li>                    
+      <li class="L1"><span class="pln"></span><span class="str">$col->{'fieldname'}->{'type'}='number'</span><span class="pun">;</span></li>              
+      <li class="L2"><span class="pln"></span><span class="str">$col->{'fieldname'}->{'friendly'}='record number'</span><span class="pun">;</span></li>            
+      <li class="L3"><span class="pln"></span><span class="str">$col->{'fieldname'}->{'placeHolder'}='Filter By'</span><span class="pun">;</span></li>    
+      <li class="L4"><span class="pln"></span><span class="str">$col->{'fieldname'}->{'unique'}=JSON::true</span><span class="pun">;</span></li>
+      <li class="L5"><span class="pln"></span><span class="str">$col->{'fieldname'}->{'filterTooltip'}=JSON::false</span><span class="pun">;</span></li>  
+  </ol>
+</pre>
+
+<p>In production I have a column database where I generate all of column 
+   definitions, so I don't need to hand code the column data. Once all of the 
+   column data has been defined, its time to pass the data to the WA Table plug-in.
+   For this we must pass back a JSON data stream. The JSON object I pass back has three properties:
+</p>
+<ul>
+   <li>success - This tells my javascript code if I'm passing back real data or an error message. <strong>It is not required for use by WA Table</strong></li>
+   <li>cols - the column setup information</li>
+   <li>rows - the actual data to populate the table with</li>
+</ul>
+
+<pre class="prettyprint linenums language-perl">
+  <ol class="linenums">
+      <li class="L0"><span class="pln"></span><span class="str">#create the JSON data to pass back to the web server</span></li>
+      <li class="L0"><span class="pln"></span><span class="str">$jsonStructure->{success} = JSON::true</span><span class="pun">;</span></li>
+      <li class="L0"><span class="pln"></span><span class="str">$jsonStructure->{cols} = $col if $col</span><span class="pun">;</span></li>
+      <li class="L0"><span class="pln"></span><span class="str">$jsonStructure->{rows} = \@names if @names</span><span class="pun">;</span></li>
+      <li class="L0"><span class="pln"></span><span class="str">my $prettyJson = $json->encode($jsonStructure)</span><span class="pun">;</span></li>
+      <li class="L0"><span class="pln"></span><span class="str">print $prettyJson."\n"</span><span class="pun">;</span></li>
+  </ol>
+</pre>
+
+<h2>Working Example</h2>
+<p>I'm using a CSV file to simulate a backend database, but in production I use 
+   a MySQL database and DBI to access all of my data. Below I show how to read 
+   the CSV data into a Perl array. I'm using CGI::Simple to parse any data being 
+   passed to the server. I'm using the Perl Maven Tutorial <a href="http://perlmaven.com/installing-perl-and-getting-started">Installing and getting started with Perl</a> 
+   as the template of my example. I suggest read this tutorial first if you don;t understand how to process data from a CSV file.    
+</p>
+
