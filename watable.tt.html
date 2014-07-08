@@ -12,24 +12,26 @@
 =social 1
 
 <h2>Problem</h2>
-<p>I write software that manages trade shows and corporate events (using Perl, 
-   HTML5, Bootstrap 2.3.3 and JQuery). I'm required to print badges for all 
-   attendees and provide a searchable report to show management. 
-   My old system grew slower and slower the more names I added to my database. 
-   After testing many table plug-ins for JQuery, I came across <a href="http://wootapa-watable.appspot.com/">WA Table</a>.
-   It provided all of the functions I needed with out having to have multiple 
-   JQuery table plug-ins conflicting with each other.
-</p>
-<p>There were no examples in the documentation as to how to link my database to 
-   the JSON format needed by the plug-in. After looking at the WA Table 
-   documentation (its a bit thin) and the supplied on-line samples (quite a lot 
-   of comments) I was able to modify my exsting Perl script to output the required 
-   JSON format to work wth the WA Table plug-in.
-</p> 
+
+I write software that manages trade shows and corporate events (using Perl, 
+HTML5, Bootstrap 2.3.3 and JQuery). I'm required to print badges for all 
+attendees and provide a searchable report to show management. 
+My old system grew slower and slower the more names I added to my database. 
+After testing many table plug-ins for JQuery, I came across <a href="http://wootapa-watable.appspot.com/">WA Table</a>.
+It provided all of the functions I needed with out having to have multiple 
+JQuery table plug-ins conflicting with each other.
+
+There were no examples in the documentation as to how to link my database to 
+the JSON format needed by the plug-in. After looking at the WA Table 
+documentation (its a bit thin) and the supplied on-line samples (quite a lot 
+of comments) I was able to modify my exsting Perl script to output the required 
+JSON format to work wth the WA Table plug-in.
 
 <h2>Why WA Table</h2>
-<p>I have tried most of the JQuery table plug-ins. Many are fine plug-ins, but 
-   none really worked that way I wanted. WA Table combines into one small JQuery plug-in all of following functions:</p>
+
+I have tried most of the JQuery table plug-ins. Many are fine plug-ins, but 
+none really worked that way I wanted. WA Table combines into one small JQuery plug-in all of following functions:
+
 <ul>
    <li>Fast Screen rendering</li>
    <li>Paganation</li>
@@ -38,79 +40,227 @@
    <li>Easy to understand javascript object format. So I can modify what I need to.</li>       
 </ul>
 
-<p>These are not all of the abilities of WA Table. For a complete list go to the WA Table web site at: <a href="http://wootapa-watable.appspot.com/">http://wootapa-watable.appspot.com/</a>
+These are not all of the abilities of WA Table. For a complete list go to the WA 
+Table web site at: <a href="http://wootapa-watable.appspot.com/">http://wootapa-watable.appspot.com/</a>
 
 <h2>How does WA Table work?</h2>
-<p>
-   WA Table is a JQuery plug-in. This means that you must include the JQuery.min.js file in your HTML file. You set up the WA Table plug-in using the following code:
-</p>
-<pre class="prettyprint linenums language-perl">
-  <ol class="linenums">
-      <li class="L0"><span class="pln">         var waTable = $('#div1').WATable({</span></li>
-      <li class="L1"><span class="pln">            url: 'watable.pl',           //Url to a webservice if not setting data manually as we do in this example</span></li>
-      <li class="L2"><span class="pln">            urlData: { MODE:0 }         //Any data you need to pass to the webservice</span></li>
-      <li class="L3"><span class="pln">        }).data('WATable'); </span></li>
-  </ol>
-</pre>
-<p>This is not a complete example of the WA Table javascriipt call. Please see the 
-   WA Table index.html file for that. It is important to note that you can pass 
-   parameters back to your Perl script using the urlData property.
-</p>
+
+WA Table is a JQuery plug-in. This means that you must include the JQuery.min.js 
+file in your HTML file. You set up the WA Table plug-in using the following code:
+
+
+<code lang="javascript">
+var waTable = $('#div1').WATable({
+    url: 'watable.pl',           //Url to a webservice if not setting data manually as we do in this example
+    urlData: { MODE:0 }          //Any data you need to pass to your perl program
+}).data('WATable');
+</code>
+
+This is not a complete example of the WA Table javascriipt call. Please see the 
+WA Table index.html file for that. It is important to note that you can pass 
+parameters back to your Perl script using the urlData property. WA Table issues a 
+JQuery .ajax call to your web server to initiate your Perl program.
+
+Sample index.html code
+<code>
+<!DOCTYPE html>
+<html>
+<head>
+    <title>WATable working with Perl</title>
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.0/jquery.js" type="text/javascript"></script>
+    <script src="http://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/js/bootstrap.min.js" type="text/javascript"></script>
+    <script src="jquery.watable.js" type="text/javascript" charset="utf-8"></script>
+    <link rel='stylesheet' href="http://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/css/bootstrap-combined.min.css"/>
+    <link rel='stylesheet' href='watable.css'/>
+    <style type="text/css">
+        body { padding: 30px; font-size: 12px }
+    </style>
+</head>
+<body>
+<h2>WATable working with Perl</h2>
+<p><a href="http://wootapa-watable.appspot.com/">http://wootapa-watable.appspot.com/</a></p>
+<div id="div1"></div>
+
+<script type="text/javascript">
+    $(document).ready( function() {
+
+        //An example with all options.
+         var waTable = $('#div1').WATable({
+            pageSize: 8,                //Sets the initial pagesize
+            filter: true,               //Show filter fields
+            columnPicker: true,         //Show the columnPicker button
+            pageSizes: [1,5,8,12,200],  //Set custom pageSizes. Leave empty array to hide button.
+            hidePagerOnEmpty: true,     //Removes the pager if data is empty.
+            checkboxes: true,           //Make rows checkable. (Note. You need a column with the 'unique' property)
+            preFill: true,              //Initially fills the table with empty rows (as many as the pagesize).
+            url: 'watablev3.pl',           //Url to a webservice if not setting data manually as we do in this example
+            urlData: { MODE:0 },         //Any data you need to pass to the webservice
+            //urlPost: true             //Use POST httpmethod to webservice. Default is GET.
+            types: {                    //Following are some specific properties related to the data types
+                string: {
+                    //filterTooltip: "Giggedi..."    //What to say in tooltip when hoovering filter fields. Set false to remove.
+                    //placeHolder: "Type here..."    //What to say in placeholder filter fields. Set false for empty.
+                },
+                number: {
+                    decimals: 1   //Sets decimal precision for float types
+                },
+                bool: {
+                    //filterTooltip: false
+                },
+                date: {
+                  utc: true,            //Show time as universal time, ie without timezones.
+                  //format: 'yy/dd/MM',   //The format. See all possible formats here http://arshaw.com/xdate/#Formatting.
+                  datePicker: true      //Requires "Datepicker for Bootstrap" plugin (http://www.eyecon.ro/bootstrap-datepicker).
+                }
+            },
+            actions: {                //This generates a button where you can add elements.
+                filter: true,         //If true, the filter fields can be toggled visible and hidden.
+                columnPicker: true,   //if true, the columnPicker can be toggled visible and hidden.
+                custom: [             //Add any other elements here. Here is a refresh and export example.
+                  $('<a href="#" class="refresh"><i class="icon-refresh"></i>&nbsp;Refresh</a>'),
+                  $('<a href="#" class="export_all"><i class="icon-share"></i>&nbsp;Export all rows</a>'),
+                  $('<a href="#" class="export_checked"><i class="icon-share"></i>&nbsp;Export checked rows</a>'),
+                  $('<a href="#" class="export_filtered"><i class="icon-share"></i>&nbsp;Export filtered rows</a>')
+                ]
+            },
+            tableCreated: function(data) {    //Fires when the table is created / recreated. Use it if you want to manipulate the table in any way.
+                console.log('table created'); //data.table holds the html table element.
+                console.log(data);            //'this' keyword also holds the html table element.
+            },
+            rowClicked: function(data) {      //Fires when a row is clicked (Note. You need a column with the 'unique' property).
+                console.log('row clicked');   //data.event holds the original jQuery event.
+                console.log(data);            //data.row holds the underlying row you supplied.
+                                              //data.column holds the underlying column you supplied.
+                                              //data.checked is true if row is checked.
+                                              //'this' keyword holds the clicked element.
+                if ( $(this).hasClass('userId') ) {
+                  data.event.preventDefault();
+                  alert('You clicked userId: ' + data.row.userId);
+                }
+            },
+            columnClicked: function(data) {    //Fires when a column is clicked
+              console.log('column clicked');  //data.event holds the original jQuery event
+              console.log(data);              //data.column holds the underlying column you supplied
+                                              //data.descending is true when sorted descending (duh)
+            },
+            pageChanged: function(data) {      //Fires when manually changing page
+              console.log('page changed');    //data.event holds the original jQuery event
+              console.log(data);              //data.page holds the new page index
+            },
+            pageSizeChanged: function(data) {  //Fires when manually changing pagesize
+              console.log('pagesize changed');//data.event holds teh original event
+              console.log(data);              //data.pageSize holds the new pagesize
+            }
+        }).data('WATable');  //This step reaches into the html data property to get the actual WATable object. Important if you want a reference to it as we want here.
+
+
+    });
+
+</script>
+</body>
+</html>
+</code>
 
 <h2>Perl to WA Table</h2>
-<p>I'm using a CSV file to simulate a backend database, but in production I use 
-   a MySQL database and DBI to access all of my data. Below I show how to read 
-   the CSV data into a Perl array. I'm using CGI::Simple to parse any data being 
-   passed to the server. I'm using the Perl Maven Tutorial <a href="http://perlmaven.com/installing-perl-and-getting-started">Installing and getting started with Perl</a> 
-   as the template of my example. I suggest read this tutorial first if you don;t understand how to process data from a CSV file.    
-</p>
 
-<pre class="prettyprint linenums language-perl">
-  <ol class="linenums">
-      <li class="L0"><span class="kwd">use</span><span class="pln"> strict</span><span class="pun">;</span></li>
-      <li class="L1"><span class="kwd">use</span><span class="pln"> warnings</span><span class="pun">;</span></li>
-      <li class="L2"><span class="kwd">use</span><span class="pln"> Text::CSV</span><span class="pun">;</span></li>
-      <li class="L3"><span class="kwd">use</span><span class="pln"> JSON</span><span class="pun">;</span></li>
-      <li class="L4"><span class="kwd">use</span><span class="pln"> CGI::Simple::Standard qw(param header url)</span><span class="pun">;</span></li>
-      <li class="L5"><span class="kwd">use</span><span class="pln"> CGI::Carp qw(fatalsToBrowser)</span><span class="pun">;</span></li>
-      <li class="L6"><span class="pln">&nbsp;</span></li>
-      <li class="L7"><span class="pln"></span><span class="str"># define my vars</span></li>
-      <li class="L8"><span class="pln"></span><span class="str">my $file = 'names.csv'</span><span class="pun">;</span></li>
-      <li class="L9"><span class="pln"></span><span class="str">my @names</span><span class="pun">;</span></li>
-      <li class="L10"><span class="pln"></span><span class="str">my $jsonStructure</span><span class="pun">;</span></li>
-      <li class="L11"><span class="pln"></span><span class="str">my $json = new JSON</span><span class="pun">;</span></li>
-      <li class="L12"><span class="pln"></span><span class="str">my $col</span><span class="pun">;</span></li>
-      <li class="L13"><span class="pln"></span><span class="str">my $q = new CGI::Simple</span><span class="pun">;</span></li>
-      <li class="L14"><span class="pln"></span><span class="str">print $q->header()</span><span class="pun">;</span></li>
-      <li class="L15"><span class="pln"></span><span class="str">&nbsp;</span></li>
-      <li class="L16"><span class="pln"></span><span class="str">my $csv = Text::CSV->new ({</span></li>
-      <li class="L17"><span class="pln"></span><span class="str">  binary    => 1,</span></li>
-      <li class="L18"><span class="pln"></span><span class="str">  auto_diag => 1,</span></li>
-      <li class="L19"><span class="pln"></span><span class="str">  sep_char  => ','    # not really needed as this is the default</span></li>
-      <li class="L20"><span class="pln"></span><span class="str">})</span><span class="pun">;</span></li>
-      <li class="L21"><span class="pln"></span><span class="str">&nbsp;</span></li>
-      <li class="L22"><span class="pln"></span><span class="str"># the lines here read the data from the name.csv file</span></li>
-      <li class="L23"><span class="pln"></span><span class="str">open(my $data, '<:encoding(utf8)', $file) or die "Could not open '$file' $!\n"</span><span class="pun">;</span></li>
-      <li class="L24"><span class="pln"></span><span class="str">$csv->column_names ($csv->getline ($data)); # use header row to define column name hash</span></li>
-      <li class="L25"><span class="pln"></span><span class="str">&nbsp;</span></li>
-      <li class="L26"><span class="pln"></span><span class="str">while (my $row = $csv->getline_hr( $data )) {</span></li>
-      <li class="L27"><span class="pln"></span><span class="str">  push @names, $row;   #data is now in a hash format of $row->{fieldname}</span></li>
-      <li class="L28"><span class="pln"></span><span class="str">}</span></li>
-      <li class="L29"><span class="pln"></span><span class="str">if (not $csv->eof) {</span></li>
-      <li class="L30"><span class="pln"></span><span class="str">  $csv->error_diag()</span><span class="pun">;</span></li>
-      <li class="L31"><span class="pln"></span><span class="str">}</span></li>
-      <li class="L32"><span class="pln"></span><span class="str">close $data</span><span class="pun">;</span></li>
-      <li class="L33"><span class="pln">&nbsp;</span></li>
-  </ol>
-</pre>
+I'm using a CSV file to simulate a backend database, but in production I use 
+a MySQL database and DBI to access all of my data. Below I show how to read 
+the CSV data into a Perl array. I'm using the Perl Maven Tutorial 
+<a href="http://perlmaven.com/installing-perl-and-getting-started">Installing and getting started with Perl</a> 
+as the template of my example. I suggest reading this tutorial first if you have 
+not worked with CSV files before.    
 
-<p>The important work is done on line 28 where I push the $row hash in to the @names array.</p>
+<code lang="perl">
+use strict;
+use warnings;
+use Text::CSV;
+use JSON;
+use CGI::Carp qw(fatalsToBrowser);
 
-<p>The next part is to define the column data expected by the WA Table plug-in. 
-   This is another hash. You need an hash entry for each column to be displayed. 
-   The base key to the column hash is the name of the field in the CSV file. WA 
-   Table is looking for the following Properties for each column.
-</p>
+# define my vars
+my $file = 'names.csv';
+my @names;
+my $jsonStructure;
+my $json = JSON->new;
+my %col;
+my $index=1;   
+
+print " Content-Type: text/html; charset=ISO-8859-1\n\n";
+ 
+my $csv = Text::CSV->new ({
+  binary    => 1,
+  auto_diag => 1,
+  sep_char  => ','    # not really needed as this is the default
+});
+ 
+# the lines here read the data from the name.csv file
+open(my $data, '<:encoding(utf8)', $file) or die "Could not open '$file' $!\n";
+
+# generate the column heading information
+$csv->column_names ($csv->getline ($data)); # use header row to define column name  hash
+
+# create each column heading definition based on the first row of the csv file.
+# I have added a few tests to assign the correct column type
+foreach my $columnheadtext ($csv->column_names)
+{ 
+  # my $columnheadtext=$_;
+   my $fieldtype='string';
+   my $uniquevalue=JSON::false;
+   
+   if ($columnheadtext eq 'BadgeID')
+   {
+      $index=0;
+      $fieldtype='number';
+      $uniquevalue=JSON::true;
+   }
+   
+   if (index(lc($columnheadtext), 'date'))
+   {
+      $fieldtype='date';
+   }
+   
+   $col{$columnheadtext} = {
+         'index'           => $index,                  # wa table column number
+         'type'            => 'string',                # wa table column type. This defines what type of filter can be applied to the data
+         'friendly'        => $columnheadtext,         # wa table column heading text
+         'placeHolder'     => 'Filter By',             # wa table filter text box placeholder text
+         'unique'          => $uniquevalue,            # wa table unique flag. Needed if you will be working with checkboxes to select records
+         'filterTooltip'   => JSON::false,             # wa table show or hide fliter tool tip
+   };
+   
+   $index++; 
+}
+
+# read the row data
+while (my $row = $csv->getline_hr( $data )) {
+  push @names, $row;   #data is now in a hash format of $row->{fieldname}
+}
+
+
+if (not $csv->eof) {
+  $csv->error_diag();
+}
+close $data;
+
+#create the JSON data to pass back to the web server
+$jsonStructure = {
+     'success'  => JSON::true,
+     'cols'     => \%col,
+     'rows'     => \@names 
+};
+
+my $prettyJson = $json->encode($jsonStructure);
+print $prettyJson."\n";
+exit;
+</code>
+
+<b>Creating the WA Table column definitions </b>
+
+Lines 17 to 59, loop through the column names returned by the Text::CSV 
+function $csv->column_names to create the column heading hash. I also perform 
+any tests for column typing here. WA Table is looking for the following 
+Properties for each column.
+
 <ol>
     <li>index = Column Number. Starting at 0</li>                    
     <li>type = Column Data Type. Used to define the type of filters to apply. These are: string, number, date and bool.</li>              
@@ -119,46 +269,77 @@
     <li>unique = wa table requires a unique ID to use it's row selection checkbox</li>
     <li>filterTooltip = Show or hide the filter tool tip</li>
 </ol>
+   
+WA Table expects the following JSON format:
 
-<pre class="prettyprint linenums language-perl">
-  <ol class="linenums">
+<code>
+    "DateAdded":{
+        "unique":false,
+        "filterTooltip":false,
+        "friendly":"DateAdded",
+        "index":16,
+        "type":"string",
+        "placeHolder":"Filter By"},
+    "FirstName":{
+        "unique":false,
+        "filterTooltip":false,
+        "friendly":"FirstName",
+        "index":1,
+        "type":"string",
+        "placeHolder":"Filter By"},
+    "City":{
+        "unique":false,
+        "filterTooltip":false,
+        "friendly":"City",
+        "index":6,
+        "type":"string",
+        "placeHolder":"Filter By"},
+ETC...
+</code>
 
-      <li class="L0"><span class="pln"></span><span class="str">$col->{'fieldname'}->{'index'}=0</span><span class="pun">;</span></li>                    
-      <li class="L1"><span class="pln"></span><span class="str">$col->{'fieldname'}->{'type'}='number'</span><span class="pun">;</span></li>              
-      <li class="L2"><span class="pln"></span><span class="str">$col->{'fieldname'}->{'friendly'}='record number'</span><span class="pun">;</span></li>            
-      <li class="L3"><span class="pln"></span><span class="str">$col->{'fieldname'}->{'placeHolder'}='Filter By'</span><span class="pun">;</span></li>    
-      <li class="L4"><span class="pln"></span><span class="str">$col->{'fieldname'}->{'unique'}=JSON::true</span><span class="pun">;</span></li>
-      <li class="L5"><span class="pln"></span><span class="str">$col->{'fieldname'}->{'filterTooltip'}=JSON::false</span><span class="pun">;</span></li>  
-  </ol>
-</pre>
+<b>Creating the WA Table row definitions </b>
 
-<p>In production I have a column database where I generate all of column 
-   definitions, so I don't need to hand code the column data. Once all of the 
-   column data has been defined, its time to pass the data to the WA Table plug-in.
-   For this we must pass back a JSON data stream. The JSON object I pass back has three properties:
-</p>
+Lines 62 to 64 read the actual table data line by line from the CSV file and 
+pushes that data in the the @names array. The Text::CSV function $csv->getline_hr( $data )
+converts each line into the following anonymous hash format:
+
+<code>
+{
+    DateAdded => "",
+    FirstName => "Melisa",
+    City      => "RICHMOND",
+ETC...    
+}
+</code>
+
+Here is a sample of the CSV data being loaded:
+<code>
+FirstName,LastName,CompanyName,Title,Address1,City,State,Zip,phone,Email,BadgeType,"Are you a memeber?","Do you want to be?","How did you hear about the event?","Hoe did you get to the event?",DateAdded,DateUpdate,PrintDate,BadgesPrinted,BadgeID
+Melisa,Aardema,The Container Store,Sales,400 ALYBAR FERRY FRY,RICHMOND,MN,56368,320-555-1212,Melisa.Aardema@test.com,Press,Yes,Yes,Email,I took the bus here,,2014-04-20 21:50:39,2014-04-20 21:50:39,1,201693
+Mose,Aavang,Alston & Bird,Finance Manager,442 FREEDOM RUN RUN,WHITE PLAINS,NY,10017,914-555-1212,Mose.Aavang@test.com,Attendee,Yes,No,Google,Shuttle bus,,2014-04-20 21:47:31,2014-04-20 21:47:31,1,200199
+Lauren,Abadi,General Mills,Investment Banking Analyst,285 DEVILS GULCH TRAFFICWAY TRFY,LOOP,TX,79377,806-555-1212,Lauren.Abadi@test.com,Set-Up,No,Yes,Radio Ad,A friend brought me,,2014-04-20 21:50:14,2014-04-20 21:50:14,1,201491
+Teofila,Abajian,Intel,Program Manager,291 JANICE TUNNEL TUNL,DURANT,IA,52769,563-555-1212,Teofila.Abajian@test.com,Exhibitor,No,No,A friend told me,I took the bus here,,2014-04-20 21:50:32,2014-04-20 21:50:32,1,201636
+Glory,Abbed,Nugget Market,Assistant Manager,119 GLENLOCH CURVE CURV,WEST ENFIELD,ME,04475,207-555-1212,Glory.Abbed@test.com,Attendee,Yes,Yes,Radio Ad,A friend brought me,,2014-04-20 21:47:58,2014-04-20 21:47:58,1,200415
+Julienne,Abboud,GoDaddy.com,Programmer,619 FOXFIELD SHOAL SHL,RIVESVILLE,WV,26554,304-555-1212,Julienne.Abboud@test.com,Press,No,No,A friend told me,I took the bus here,,2014-04-20 21:47:44,2014-04-20 21:47:44,1,200304
+Jaclyn,Abdallah,Autodesk,Research Assistant,296 WILLOW CIRCLE STREETS STS,PALMER,MA,01009,413-555-1212,Jaclyn.Abdallah@test.com,Speaker,No,No,A friend told me,A friend brought me,,2014-04-20 21:51:06,2014-04-20 21:51:06,1,201905
+Rebecca,Abdelmuti,Kimpton Hotels & Restaurants,Process Engineer,979 RED RIVER POINTS PTS,MANTEO,NC,27953,252-555-1212,Rebecca.Abdelmuti@test.com,Set-Up,No,Yes,Email,I took the bus here,,2014-04-20 21:47:23,2014-04-20 21:47:23,1,200130
+</code>
+
+<b>Putting it all together and pasing the data to WA Table</b>
+
+At this point we have the column and row data processed. Its now time to create 
+the JSON data to pass back to the WA Table ajax call. The JSON object I pass 
+back has three properties:
+
 <ul>
    <li>success - This tells my javascript code if I'm passing back real data or an error message. <strong>It is not required for use by WA Table</strong></li>
    <li>cols - the column setup information</li>
    <li>rows - the actual data to populate the table with</li>
 </ul>
 
-<pre class="prettyprint linenums language-perl">
-  <ol class="linenums">
-      <li class="L0"><span class="pln"></span><span class="str">#create the JSON data to pass back to the web server</span></li>
-      <li class="L0"><span class="pln"></span><span class="str">$jsonStructure->{success} = JSON::true</span><span class="pun">;</span></li>
-      <li class="L0"><span class="pln"></span><span class="str">$jsonStructure->{cols} = $col if $col</span><span class="pun">;</span></li>
-      <li class="L0"><span class="pln"></span><span class="str">$jsonStructure->{rows} = \@names if @names</span><span class="pun">;</span></li>
-      <li class="L0"><span class="pln"></span><span class="str">my $prettyJson = $json->encode($jsonStructure)</span><span class="pun">;</span></li>
-      <li class="L0"><span class="pln"></span><span class="str">print $prettyJson."\n"</span><span class="pun">;</span></li>
-  </ol>
-</pre>
+Lines 73 to 77 handle setting up the Perl hash I need to create the proper JSON 
+output.
 
-<h2>Working Example</h2>
-<p>I'm using a CSV file to simulate a backend database, but in production I use 
-   a MySQL database and DBI to access all of my data. Below I show how to read 
-   the CSV data into a Perl array. I'm using CGI::Simple to parse any data being 
-   passed to the server. I'm using the Perl Maven Tutorial <a href="http://perlmaven.com/installing-perl-and-getting-started">Installing and getting started with Perl</a> 
-   as the template of my example. I suggest read this tutorial first if you don;t understand how to process data from a CSV file.    
-</p>
 
+<b>About the Author</b>
+Richard Noble is the owner of IBK Software in New York City. He writes software to manage trade show and events. He has been working in Perl since Perl 4.0. He can be contacted via Linkedin at www.linkedin.com/pub/richard-noble/15/725/132/ 
